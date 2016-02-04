@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+
+  "name": "Diablo Fans Extension",
+  "description": "This extension will add functionality to diablo fans website",
+  "version": "1.0",
+
+  "browser_action": {
+    "default_icon": "icons/toolbar.png"
+    // "default_popup": "html/popup.html"
+  },
+  "permissions": [
+    "tabs"
+    //"http://www.diablofans.com/*"
+  ],
+  "content_scripts" :[
+      {
+        // "matches": ["http://www.diablofans.com/builds*"],
+        "matches": [
+            "http://www.diablofans.com/builds*"
+        ],        
+        "js": ["lib/jquery-2.2.0.min.js", "scripts/all.js"],
+        "css" : ["css/builds.css"]
+      }
+  ] 
+}
