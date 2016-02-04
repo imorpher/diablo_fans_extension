@@ -10,7 +10,7 @@
     // "default_popup": "html/popup.html"
   },
   "permissions": [
-    "tabs"
+    "storage"
     //"http://www.diablofans.com/*"
   ],
   "content_scripts" :[
