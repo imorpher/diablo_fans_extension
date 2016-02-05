@@ -1,7 +1,5 @@
 $item-owned-color : green;
 
 .item-owned{
-    // border:1px solid $item-owned-color;
-    // box-sizing: border-box;
     box-shadow: 0 0 0 1px $item-owned-color inset; 
 }

@@ -51,8 +51,8 @@
                 var searchFilter = {};                
                 searchFilter[key] = undefined;
                 
-                chrome.storage.local.get(key, function(result){                       
-                    if(result === undefined){
+                chrome.storage.local.get(key, function(result){
+                    if(!Array.isArray(result[key])){
                         searchFilter[key] = [];
                                                 
                         chrome.storage.local.set(searchFilter, function(){
@@ -72,12 +72,12 @@
                 var searchFilter = {};                
                 searchFilter[key] = undefined;
                 
-                chrome.storage.local.get(searchFilter, function(result){   
-                    
+                chrome.storage.local.get(key, function(result){   
                     if(result === undefined)
                         reject();
                              
-                    searchFilter[key] = result[key].push(itemId);
+                    searchFilter[key] = result[key];
+                    searchFilter[key].push(itemId);
                     
                     chrome.storage.local.set(searchFilter, function(){
                         resolve(result[key]);
@@ -85,16 +85,18 @@
                 });
             });
         },
+        
         remove : function(key, itemId){
             return new Promise(function(resolve, reject){
                 var searchFilter = {};                
                 searchFilter[key] = undefined;
                 
-                chrome.storage.local.get(searchFilter, function(result){
+                chrome.storage.local.get(key, function(result){
                     if(result === undefined)
                         reject();
                     
-                    searchFilter[key] = result[key].splice(result[key].indexOf(itemId), 1);
+                    searchFilter[key] = result[key];
+                    searchFilter[key].splice(result[key].indexOf(itemId), 1);
 
                     chrome.storage.local.set(searchFilter, function(){
                         resolve(result[key]);
