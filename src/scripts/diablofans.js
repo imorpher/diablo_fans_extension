@@ -1,84 +1,133 @@
 (function(){
-    
-    var itemsOwned = [];
-    
+        
     $(document).ready(function(){
-        var itemObjects = [];
+        var itemsSelector = '.item-selection [data-item-id],[data-cube-stat-selected]';
+            //gemSelector = '#item-gem [data-item-id]';
         
-        getItems();
+        itemsOwned.getAll();
         
-        $('.item-equip li [data-item-id]').click(function(){
-            if(!$(this).hasClass('item-owned')){
-                $(this).addClass('item-owned');
-                saveItem($(this).attr('data-item-id'));
-            }
-            else{
-                $(this).removeClass('item-owned');
-                removeItem($(this).attr('data-item-id'));
-            }
+        $(itemsSelector ).click(function(){
+            itemClicked($(this));
         });
-        
-        
-        // $('.item-equip li [data-item-id]').each(function(){
-        //     itemObjects.push({
-        //         'id' : $(this).attr('data-item-id'),
-        //         'name' : $(this)[0].innerText,
-        //         'object' : $(this)[0]
-        //     });
-        //     
-        //     if(localStorage.itemsOwned.indexOf($(this).attr('data-item-id')) > -1)
-        //         $(this).addClass('item-owned');
-        //     
-        //     $(this).click(function(){
-        //         if(!$(this).hasClass('item-owned')){
-        //             $(this).addClass('item-owned');
-        //             saveItem($(this).attr('data-item-id'));
-        //         }
-        //         else{
-        //             $(this).removeClass('item-owned');
-        //             removeItem($(this).attr('data-item-id'));
-        //         }
-        //     });
-        // });
     });
     
-    var loadOwnedItems = function(itemsOwned){
-        itemsOwned.forEach(function(io){
-            $('.item-equip li [data-item-id='+io+']').addClass('item-owned');
+    var itemClicked = function(jqueryObject){
+        if(!jqueryObject.hasClass('item-owned')){
+            jqueryObject.addClass('item-owned');
+            itemsOwned.add(jqueryObject.attr('data-item-id'));
+        }
+        else{
+            jqueryObject.removeClass('item-owned');
+            itemsOwned.remove(jqueryObject.attr('data-item-id'));
+        }
+    };
+    
+    var loadOwnedItems = function(items){
+        items.forEach(function(io){
+            $('.item-selection [data-item-id='+io+']').addClass('item-owned');
+            
         });
     };
     
-    var getItems = function(){
-        chrome.storage.local.get('itemsOwned', function(result){
-                        
-            if(! ('itemsOwned' in result)){
-                chrome.storage.local.set({'itemsOwned' : []}, function(){
-                    itemsOwned = []; 
-                    loadOwnedItems(itemsOwned);
+    var cubesOwned = {
+        items : [],
+        
+        getAll : function(){
+            
+        },
+        
+        add : function(itemId){
+            
+        },
+        
+        remove : function(itemId){
+            
+        }
+    };
+    
+    var localStorage = {
+        getAll : function(key){
+            return new Promise(function(resolve, reject){
+                var searchFilter = {};                
+                searchFilter[key] = undefined;
+                
+                chrome.storage.local.get(key, function(result){                       
+                    if(result === undefined){
+                        searchFilter[key] = [];
+                                                
+                        chrome.storage.local.set(searchFilter, function(){
+                            resolve([]); 
+                        });
+                    }
+                    else{                
+                        resolve(result[key]); 
+                    }
                 });
-            }
-            else{                
-                itemsOwned = result.itemsOwned; 
-                loadOwnedItems(itemsOwned);
-            }
-        });
+            });
+        },
+            
+        add : function(key, itemId){
+            return new Promise(function(resolve, reject){
+                
+                var searchFilter = {};                
+                searchFilter[key] = undefined;
+                
+                chrome.storage.local.get(searchFilter, function(result){   
+                    
+                    if(result === undefined)
+                        reject();
+                             
+                    searchFilter[key] = result[key].push(itemId);
+                    
+                    chrome.storage.local.set(searchFilter, function(){
+                        resolve(result[key]);
+                    });
+                });
+            });
+        },
+        remove : function(key, itemId){
+            return new Promise(function(resolve, reject){
+                var searchFilter = {};                
+                searchFilter[key] = undefined;
+                
+                chrome.storage.local.get(searchFilter, function(result){
+                    if(result === undefined)
+                        reject();
+                    
+                    searchFilter[key] = result[key].splice(result[key].indexOf(itemId), 1);
+
+                    chrome.storage.local.set(searchFilter, function(){
+                        resolve(result[key]);
+                    });
+                }); 
+            });
+        }
     };
     
-    var saveItem = function(itemId){
-        chrome.storage.local.get('itemsOwned', function(result){            
-            result.itemsOwned.push(itemId);
-            chrome.storage.local.set({'itemsOwned' : result.itemsOwned}, function(){
-                itemsOwned=result.itemsOwned;
+    var itemsOwned = {
+        items : [],
+        
+        key : 'itemsOwned',
+        
+        getAll : function(){
+            localStorage.getAll(itemsOwned.key).then(function(result){
+                itemsOwned.items = result; 
+                loadOwnedItems(itemsOwned.items);
             });
-        });
+        },
+        
+        add : function(itemId){
+            localStorage.add(itemsOwned.key, itemId).then(function(result){
+                itemsOwned.items = result;
+            });
+        },
+        
+        remove : function(itemId){
+            localStorage.remove(itemsOwned.key, itemId).then(function(result){
+                itemsOwned.items = result;
+            });
+        }
     };
     
-    var removeItem = function(itemId){
-        chrome.storage.local.get('itemsOwned', function(result){
-            result.itemsOwned.splice(result.itemsOwned.indexOf(itemId), 1);
-            chrome.storage.local.set({'itemsOwned' : result.itemsOwned}, function(){
-                itemsOwned=result.itemsOwned;
-            });
-        });
-    };
+    
 })();  
